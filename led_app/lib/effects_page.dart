@@ -67,6 +67,36 @@ class _EffectsPageState extends State<EffectsPage> {
               ),
               child: Text('Pulse'),
             ),
+            SizedBox(height: 16),
+            ElevatedButton(
+              onPressed: () {
+                setState(() {
+                  selectedEffect = 'Blink';
+                });
+              },
+              style: ElevatedButton.styleFrom(
+                padding: EdgeInsets.symmetric(vertical: 20, horizontal: 40),
+                textStyle: TextStyle(fontSize: 20),
+                primary: selectedEffect == 'Blink' ? Colors.grey : Colors.indigo,
+                onPrimary: Colors.white,
+              ),
+              child: Text('Blink'),
+            ),
+            SizedBox(height: 16),
+            ElevatedButton(
+              onPressed: () {
+                setState(() {
+                  selectedEffect = 'Fade';
+                });
+              },
+              style: ElevatedButton.styleFrom(
+                padding: EdgeInsets.symmetric(vertical: 20, horizontal: 40),
+                textStyle: TextStyle(fontSize: 20),
+                primary: selectedEffect == 'Fade' ? Colors.grey : Colors.indigo,
+                onPrimary: Colors.white,
+              ),
+              child: Text('Fade'),
+            ),
           ],
         ),
       ),
