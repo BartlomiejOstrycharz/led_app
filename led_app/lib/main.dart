@@ -126,6 +126,26 @@ class _MyHomePageState extends State<MyHomePage> {
             ),
           ],
         ),
+        actions: [
+          ElevatedButton(
+            onPressed: toggleLed,
+            style: ElevatedButton.styleFrom(
+              primary: isLedOn ? Colors.red : Colors.green,
+              onPrimary: Colors.white,
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(50),
+              ),
+            ),
+            child: Row(
+              children: [
+                Icon(isLedOn ? Icons.power_settings_new : Icons.power_off),
+                SizedBox(width: 8),
+                Text(isLedOn ? 'Turn Off' : 'Turn On'),
+              ],
+            ),
+          ),
+          SizedBox(width: 16),
+        ],
       ),
       body: Container(
         color: Colors.grey[200],
@@ -154,21 +174,23 @@ class _MyHomePageState extends State<MyHomePage> {
                 icon: Icon(Icons.color_lens),
                 label: Text('Set Color'),
               ),
-              SizedBox(height: 80),
-              ElevatedButton.icon(
-                onPressed: toggleLed,
+              SizedBox(height: 16),
+              ElevatedButton(
+                onPressed: () {
+                  Navigator.push(
+                    context,
+                    MaterialPageRoute(builder: (context) => EffectsPage()),
+                  );
+                },
                 style: ElevatedButton.styleFrom(
                   padding: EdgeInsets.symmetric(vertical: 20, horizontal: 40),
                   textStyle: TextStyle(fontSize: 20),
-                  primary: isLedOn ? Colors.red : Colors.green,
+                  primary: Colors.indigo,
                   onPrimary: Colors.white,
-                  shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(50),
-                  ),
                 ),
-                icon: Icon(isLedOn ? Icons.power_settings_new : Icons.power_off),
-                label: Text(isLedOn ? 'Turn Off' : 'Turn On'),
+                child: Text('Effects'),
               ),
+              SizedBox(height: 80),
             ],
           ),
         ),
@@ -180,5 +202,79 @@ class _MyHomePageState extends State<MyHomePage> {
     setState(() {
       currentColor = color;
     });
+  }
+}
+
+class EffectsPage extends StatefulWidget {
+  @override
+  _EffectsPageState createState() => _EffectsPageState();
+}
+
+class _EffectsPageState extends State<EffectsPage> {
+  String selectedEffect = 'Solid';
+
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      appBar: AppBar(
+        title: Text('LED Effects'),
+      ),
+      body: Center(
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            Text(
+              'Selected Effect: $selectedEffect',
+              style: TextStyle(fontSize: 24, fontWeight: FontWeight.bold),
+            ),
+            SizedBox(height: 16),
+            ElevatedButton(
+              onPressed: () {
+                setState(() {
+                  selectedEffect = 'Solid';
+                });
+              },
+              style: ElevatedButton.styleFrom(
+                padding: EdgeInsets.symmetric(vertical: 20, horizontal: 40),
+                textStyle: TextStyle(fontSize: 20),
+                primary: selectedEffect == 'Solid' ? Colors.grey : Colors.indigo,
+                onPrimary: Colors.white,
+              ),
+              child: Text('Solid'),
+            ),
+            SizedBox(height: 16),
+            ElevatedButton(
+              onPressed: () {
+                setState(() {
+                  selectedEffect = 'Wave';
+                });
+              },
+              style: ElevatedButton.styleFrom(
+                padding: EdgeInsets.symmetric(vertical: 20, horizontal: 40),
+                textStyle: TextStyle(fontSize: 20),
+                primary: selectedEffect == 'Wave' ? Colors.grey : Colors.indigo,
+                onPrimary: Colors.white,
+              ),
+              child: Text('Wave'),
+            ),
+            SizedBox(height: 16),
+            ElevatedButton(
+              onPressed: () {
+                setState(() {
+                  selectedEffect = 'Pulse';
+                });
+              },
+              style: ElevatedButton.styleFrom(
+                padding: EdgeInsets.symmetric(vertical: 20, horizontal: 40),
+                textStyle: TextStyle(fontSize: 20),
+                primary: selectedEffect == 'Pulse' ? Colors.grey : Colors.indigo,
+                onPrimary: Colors.white,
+              ),
+              child: Text('Pulse'),
+            ),
+          ],
+        ),
+      ),
+    );
   }
 }
