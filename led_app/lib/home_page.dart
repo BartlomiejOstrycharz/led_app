@@ -9,8 +9,8 @@ class MyHomePage extends StatefulWidget {
 }
 
 class _MyHomePageState extends State<MyHomePage> {
-  Color currentColor = Colors.white; // Default color
-  Color lastSelectedColor = Colors.white; // Store the last selected color
+  Color currentColor = Colors.red; // Default color
+  Color lastSelectedColor = Colors.red; // Store the last selected color
   bool isLedOn = false;
 
   @override
@@ -18,39 +18,45 @@ class _MyHomePageState extends State<MyHomePage> {
     super.initState();
     // Fetch the initial state of the LEDs when the app starts
     HttpService.fetchLedState().then((bool ledState) {
-      setState(() {
-        isLedOn = ledState;
-      });
+      if (mounted) {
+        setState(() {
+          isLedOn = ledState;
+        });
+      }
     });
   }
 
   Future<void> setColor() async {
-    if (isLedOn) {
-      final red = currentColor.red.toString();
-      final green = currentColor.green.toString();
-      final blue = currentColor.blue.toString();
+    if (mounted) {
+      if (isLedOn) {
+        final red = currentColor.red.toString();
+        final green = currentColor.green.toString();
+        final blue = currentColor.blue.toString();
 
-      try {
-        await HttpService.setColor(red, green, blue);
-        // Update the last selected color
-        setState(() {
-          lastSelectedColor = currentColor;
-        });
-        print('Color set successfully');
-      } catch (error) {
-        print('Failed to set color: $error');
+        try {
+          await HttpService.setColor(red, green, blue);
+          // Update the last selected color
+          setState(() {
+            lastSelectedColor = currentColor;
+          });
+          print('Color set successfully');
+        } catch (error) {
+          print('Failed to set color: $error');
+        }
+      } else {
+        print('LEDs are turned off. Cannot set color.');
       }
-    } else {
-      print('LEDs are turned off. Cannot set color.');
     }
   }
 
   Future<void> toggleLed() async {
     try {
       await HttpService.toggleLed(isLedOn);
-      setState(() {
-        isLedOn = !isLedOn;
-      });
+      if (mounted) {
+        setState(() {
+          isLedOn = !isLedOn;
+        });
+      }
 
       if (isLedOn) {
         // If turning on, use the last selected color
@@ -141,10 +147,12 @@ class _MyHomePageState extends State<MyHomePage> {
               SizedBox(height: 16),
               ElevatedButton(
                 onPressed: () {
-                  Navigator.push(
-                    context,
-                    MaterialPageRoute(builder: (context) => EffectsPage()),
-                  );
+                  if (mounted) {
+                    Navigator.push(
+                      context,
+                      MaterialPageRoute(builder: (context) => EffectsPage()),
+                    );
+                  }
                 },
                 style: ElevatedButton.styleFrom(
                   padding: EdgeInsets.symmetric(vertical: 20, horizontal: 40),

@@ -39,4 +39,18 @@ class HttpService {
       print('Failed to toggle LED state');
     }
   }
+  static Future<void> setEffect(String effect) async {
+    try {
+      final response = await http.post(
+        Uri.parse('$baseUrl/setEffect'),
+        body: {'effect': effect},
+      );
+
+      if (response.statusCode != 200) {
+        print('Failed to set effect');
+      }
+    } catch (error) {
+      print('Error setting effect: $error');
+    }
+  }
 }
