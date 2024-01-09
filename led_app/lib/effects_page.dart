@@ -14,9 +14,11 @@ class _EffectsPageState extends State<EffectsPage> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: Text('LED Effects',
-                style: TextStyle(color: Colors.white),),
-        backgroundColor: Colors.blue, // Set the app bar background color to blue
+        title: Text(
+          'LED Effects',
+          style: TextStyle(color: Colors.white),
+        ),
+        backgroundColor: Colors.blue,
       ),
       body: Center(
         child: Column(
@@ -30,8 +32,8 @@ class _EffectsPageState extends State<EffectsPage> {
             _buildEffectButton('Solid'),
             SizedBox(height: 16),
             _buildEffectButton('Wave'),
-            // Add similar buttons for other effects
-            // ...
+            SizedBox(height: 16),
+            _buildEffectButton('Pulse'),
           ],
         ),
       ),
@@ -58,12 +60,19 @@ class _EffectsPageState extends State<EffectsPage> {
   void _setEffect(String effect) async {
     try {
       await HttpService.setEffect(effect);
-      setState(() {
-        selectedEffect = effect;
-      });
-      print('Effect set successfully: $effect');
+
+      // Check if LEDs are still on before updating the state
+      bool ledState = await HttpService.fetchLedState();
+      if (mounted && ledState) {
+        setState(() {
+          selectedEffect = effect;
+        });
+        print('Effect set successfully: $effect');
+      }
     } catch (error) {
       print('Failed to set effect: $error');
     }
   }
+
+
 }

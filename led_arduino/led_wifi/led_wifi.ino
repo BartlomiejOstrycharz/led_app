@@ -15,8 +15,9 @@ Adafruit_NeoPixel strip = Adafruit_NeoPixel(NUM_LEDS, LED_PIN, NEO_GRB + NEO_KHZ
 bool isLedOn = false;
 String selectedEffect = "Solid";
 String lastSelectedEffect = "Solid"; // Store the last selected effect
-int currentColor[3] = {255, 0, 0}; // Default color: Red
+int currentColor[3] = {255, 0, 0};     // Default color: Red
 bool waveEffectRunning = false;
+bool pulseEffectRunning = false;
 
 uint32_t colorWave(int red, int green, int blue, int pixel, int offset) {
   int wave = sin((pixel + offset) * 0.2) * 127 + 128; // Adjust the frequency and amplitude as needed
@@ -26,7 +27,7 @@ uint32_t colorWave(int red, int green, int blue, int pixel, int offset) {
 void handleRoot() {
   server.send(200, "text/html", "<html><body><form action='/setColor' method='post'>Red: <input type='text' name='red'><br>Green: <input type='text' name='green'><br>Blue: <input type='text' name='blue'><br><input type='submit' value='Set Color'></form>"
                                   "<br><form action='/setEffect' method='post'>Select Effect: "
-                                  "<select name='effect'><option value='Solid'>Solid</option><option value='Wave'>Wave</option></select>"
+                                  "<select name='effect'><option value='Solid'>Solid</option><option value='Wave'>Wave</option><option value='Pulse'>Pulse</option></select>"
                                   "<br><input type='submit' value='Set Effect'></form></body></html>");
 }
 
@@ -61,6 +62,9 @@ void handleToggleLed() {
     if (waveEffectRunning) {
       // If turning on and wave effect is running, restart the wave effect
       waveEffectRunning = true;
+    } else if (pulseEffectRunning) {
+      // If turning on and pulse effect is running, restart the pulse effect
+      pulseEffectRunning = true;
     } else {
       // If turning on and last selected effect is solid color, set the solid color
       if (lastSelectedEffect == "Solid") {
@@ -71,12 +75,13 @@ void handleToggleLed() {
       }
     }
   } else {
-    // If turning off, turn off the LEDs and stop the wave effect
+    // If turning off, turn off the LEDs and stop the wave and pulse effects
     for (int i = 0; i < NUM_LEDS; i++) {
       strip.setPixelColor(i, strip.Color(0, 0, 0));
     }
     strip.show();
     waveEffectRunning = false;
+    pulseEffectRunning = false;
   }
 
   Serial.println(isLedOn ? "LEDs turned on" : "LEDs turned off");
@@ -98,8 +103,13 @@ void handleSetEffect() {
       }
       strip.show();
       waveEffectRunning = false; // Stop the wave effect
+      pulseEffectRunning = false; // Stop the pulse effect
     } else if (selectedEffect == "Wave") {
       waveEffectRunning = true; // Start the wave effect
+      pulseEffectRunning = false; // Stop the pulse effect
+    } else if (selectedEffect == "Pulse") {
+      pulseEffectRunning = true; // Start the pulse effect
+      waveEffectRunning = false; // Stop the wave effect
     }
 
     lastSelectedEffect = selectedEffect; // Update the last selected effect
@@ -113,7 +123,6 @@ void handleSetEffect() {
     server.send(200, "text/plain", "LED is turned off. Cannot set effect.");
   }
 }
-
 
 void handleSolidEffect(int red, int green, int blue) {
   for (int i = 0; i < NUM_LEDS; i++) {
@@ -132,9 +141,28 @@ void handleWaveEffect(int red, int green, int blue) {
   delay(20); // Adjust the delay to control the speed of the wave
 }
 
+void handlePulseEffect(int red, int green, int blue) {
+  static int brightness = 0;
+  static int pulseDirection = 1;
+
+  // Adjust the pulse speed and range as needed
+  brightness += pulseDirection * 5;
+  if (brightness <= 0 || brightness >= 255) {
+    pulseDirection *= -1;
+  }
+
+  for (int i = 0; i < NUM_LEDS; i++) {
+    strip.setPixelColor(i, strip.Color((brightness * red) / 255, (brightness * green) / 255, (brightness * blue) / 255));
+  }
+  strip.show();
+  delay(50); // Adjust the delay to control the speed of the pulse
+}
+
 void updateWaveEffect() {
   if (waveEffectRunning) {
     handleWaveEffect(currentColor[0], currentColor[1], currentColor[2]);
+  } else if (pulseEffectRunning) {
+    handlePulseEffect(currentColor[0], currentColor[1], currentColor[2]);
   }
 }
 
@@ -161,5 +189,5 @@ void setup() {
 
 void loop() {
   server.handleClient();
-  updateWaveEffect(); // Update the wave effect continuously
+  updateWaveEffect(); // Update the wave and pulse effects continuously
 }
