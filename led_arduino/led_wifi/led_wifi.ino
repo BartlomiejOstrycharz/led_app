@@ -18,16 +18,64 @@ String lastSelectedEffect = "Solid"; // Store the last selected effect
 int currentColor[3] = {255, 0, 0};     // Default color: Red
 bool waveEffectRunning = false;
 bool pulseEffectRunning = false;
+bool sparkleEffectRunning = false;
+bool wieaEffectRunning = false;
 
 uint32_t colorWave(int red, int green, int blue, int pixel, int offset) {
   int wave = sin((pixel + offset) * 0.2) * 127 + 128; // Adjust the frequency and amplitude as needed
   return strip.Color((wave * red) / 255, (wave * green) / 255, (wave * blue) / 255);
 }
 
+void sparkleEffect(int numSparkles, int sparkleDuration, int color[3]) {
+  for (int i = 0; i < numSparkles; i++) {
+    int randomPixel = random(NUM_LEDS);
+    strip.setPixelColor(randomPixel, strip.Color(color[0], color[1], color[2]));
+    strip.show();
+    delay(sparkleDuration);
+    strip.setPixelColor(randomPixel, strip.Color(0, 0, 0)); // Turn off the LED
+    strip.show();
+  }
+}
+
+void wieaEffect() {
+ for (int i = 0; i < 10; i++) {
+    strip.setPixelColor(i, strip.Color(255, 255, 255)); // White
+  }
+
+  // Set the next 20 LEDs to orange
+  for (int i = 10; i < 30; i++) {
+    strip.setPixelColor(i, strip.Color(255, 102, 0)); // Orange
+  }
+
+  // Set the next 20 LEDs to dark blue
+  for (int i = 30; i < 50; i++) {
+    strip.setPixelColor(i, strip.Color(0, 0, 139)); // Dark Blue
+  }
+
+  // Set the last 10 LEDs to white
+  for (int i = 50; i < NUM_LEDS; i++) {
+    strip.setPixelColor(i, strip.Color(255, 255, 255)); // White
+  }
+
+   strip.show();
+}
+
+void updateWiEAEffect() {
+  if (wieaEffectRunning) {
+    wieaEffect();
+  }
+}
+
+void updateSparkleEffect() {
+  if (sparkleEffectRunning) {
+    sparkleEffect(1, 50, currentColor); // Adjust the number of sparkles and duration as needed
+  }
+}
+
 void handleRoot() {
   server.send(200, "text/html", "<html><body><form action='/setColor' method='post'>Red: <input type='text' name='red'><br>Green: <input type='text' name='green'><br>Blue: <input type='text' name='blue'><br><input type='submit' value='Set Color'></form>"
                                   "<br><form action='/setEffect' method='post'>Select Effect: "
-                                  "<select name='effect'><option value='Solid'>Solid</option><option value='Wave'>Wave</option><option value='Pulse'>Pulse</option></select>"
+                                  "<select name='effect'><option value='Solid'>Solid</option><option value='Wave'>Wave</option><option value='Pulse'>Pulse</option><option value='Sparkle'>Sparkle</option><option value='WiEA'>WiEA</option></select>"
                                   "<br><input type='submit' value='Set Effect'></form></body></html>");
 }
 
@@ -75,13 +123,15 @@ void handleToggleLed() {
       }
     }
   } else {
-    // If turning off, turn off the LEDs and stop the wave and pulse effects
+    // If turning off, turn off the LEDs and stop the wave, pulse, sparkle, and WiEA effects
     for (int i = 0; i < NUM_LEDS; i++) {
       strip.setPixelColor(i, strip.Color(0, 0, 0));
     }
     strip.show();
     waveEffectRunning = false;
     pulseEffectRunning = false;
+    sparkleEffectRunning = false;
+    wieaEffectRunning = false;
   }
 
   Serial.println(isLedOn ? "LEDs turned on" : "LEDs turned off");
@@ -104,12 +154,28 @@ void handleSetEffect() {
       strip.show();
       waveEffectRunning = false; // Stop the wave effect
       pulseEffectRunning = false; // Stop the pulse effect
+      sparkleEffectRunning = false; // Stop the sparkle effect
+      wieaEffectRunning = false; // Stop the WiEA effect
     } else if (selectedEffect == "Wave") {
       waveEffectRunning = true; // Start the wave effect
       pulseEffectRunning = false; // Stop the pulse effect
+      sparkleEffectRunning = false; // Stop the sparkle effect
+      wieaEffectRunning = false; // Stop the WiEA effect
     } else if (selectedEffect == "Pulse") {
       pulseEffectRunning = true; // Start the pulse effect
       waveEffectRunning = false; // Stop the wave effect
+      sparkleEffectRunning = false; // Stop the sparkle effect
+      wieaEffectRunning = false; // Stop the WiEA effect
+    } else if (selectedEffect == "Sparkle") {
+      sparkleEffectRunning = true; // Start the sparkle effect
+      waveEffectRunning = false; // Stop the wave effect
+      pulseEffectRunning = false; // Stop the pulse effect
+      wieaEffectRunning = false; // Stop the WiEA effect
+    } else if (selectedEffect == "WiEA") {
+      wieaEffectRunning = true; // Start the WiEA effect
+      waveEffectRunning = false; // Stop the wave effect
+      pulseEffectRunning = false; // Stop the pulse effect
+      sparkleEffectRunning = false; // Stop the sparkle effect
     }
 
     lastSelectedEffect = selectedEffect; // Update the last selected effect
@@ -163,6 +229,10 @@ void updateWaveEffect() {
     handleWaveEffect(currentColor[0], currentColor[1], currentColor[2]);
   } else if (pulseEffectRunning) {
     handlePulseEffect(currentColor[0], currentColor[1], currentColor[2]);
+  } else if (sparkleEffectRunning) {
+    updateSparkleEffect();
+  } else if (wieaEffectRunning) {
+    updateWiEAEffect();
   }
 }
 
@@ -189,5 +259,5 @@ void setup() {
 
 void loop() {
   server.handleClient();
-  updateWaveEffect(); // Update the wave and pulse effects continuously
+  updateWaveEffect(); // Update the wave, pulse, sparkle, and WiEA effects continuously
 }
