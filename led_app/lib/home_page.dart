@@ -86,7 +86,7 @@ class _MyHomePageState extends State<MyHomePage> {
             ),
             SizedBox(width: 8),
             Text(
-              'LED Control App',
+              'LED Control',
               style: TextStyle(
                 fontWeight: FontWeight.bold,
                 fontSize: 20,
@@ -124,7 +124,7 @@ class _MyHomePageState extends State<MyHomePage> {
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
               Text(
-                'Set LED Color:',
+                'Pick color:',
                 style: TextStyle(fontSize: 24, fontWeight: FontWeight.bold),
               ),
               SizedBox(height: 16),
